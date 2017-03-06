@@ -12,6 +12,21 @@ struct Index {
    int y;
 };
 
+class Rect {
+private:
+   int top, bottom, left, right;
+public:
+   Rect(Index l, Index r, Index t, Index b) {
+      left = l.y;
+      right = r.y;
+      top = t.x;
+      bottom = b.x;
+   }
+   bool inRect(Index index) {
+      return (index.x < bottom && index.x > top) && (index.y < right && index.y > left);
+   }
+};
+
 class Image {
 private:
    unsigned long** data;

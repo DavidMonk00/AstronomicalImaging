@@ -7,6 +7,11 @@
 
 using namespace CCfits;
 
+struct Index {
+   int x;
+   int y;
+};
+
 class Image {
 private:
    unsigned long** data;
@@ -19,9 +24,6 @@ public:
       PHDU& image = pInfile->pHDU();
       image.readAllKeys();
       image.read(contents);
-      //std::cout << image << std::endl;
-      std::cout << image.axis(0) << std::endl;
-      std::cout << image.axis(1) << std::endl;
       ax0 = image.axis(0);
       ax1 = image.axis(1);
       data = new unsigned long*[ax0];
@@ -60,6 +62,21 @@ public:
       }
       std::cout << std::endl;
    }
+   Index maxIndex() {
+   	int i,j;
+   	Index index;
+   	unsigned int max = 0;
+   	for (i = 0; i < ax0; i++) {
+   		for(j = 0; j < ax1; j++) {
+   			if (data[i][j] > max) {
+   				max = data[i][j];
+   				index.x = i;
+   				index.y = j;
+   			}
+   		}
+   	}
+   	return index;
+   }
 };
 
 
@@ -67,5 +84,8 @@ int main() {
    ::Image img;
    img.readImage();
    img.generateMask(3200);
+   Index index = img.maxIndex();
+   std::cout << index.x << std::endl;
+   std::cout << index.y << std::endl;
    //img.printData();
 }

@@ -16,14 +16,21 @@ class Rect {
 private:
    int top, bottom, left, right;
 public:
-   Rect(Index l, Index r, Index t, Index b) {
-      left = l.y;
-      right = r.y;
-      top = t.x;
-      bottom = b.x;
+   Rect(int l, int r, int t, int b) {
+      left = l;
+      right = r;
+      top = t;
+      bottom = b;
    }
    bool inRect(Index index) {
       return (index.x < bottom && index.x > top) && (index.y < right && index.y > left);
+   }
+   void maskRect(bool** mask) {
+      for (int i = left; i < right; i++) {
+         for (int j = top; j < bottom; j++) {
+            mask[i][j] = false;
+         }
+      }
    }
 };
 
@@ -33,7 +40,11 @@ private:
    std::valarray<unsigned long> contents;
    bool** mask;
    long ax0,ax1;
+   unsigned int cutoff;
 public:
+   Image(int co) {
+      cutoff = co;
+   }
    void readImage() {
       std::auto_ptr<FITS> pInfile(new FITS("./A1_mosaic.fits",Read,true));
       PHDU& image = pInfile->pHDU();
@@ -77,30 +88,54 @@ public:
       }
       std::cout << std::endl;
    }
-   Index maxIndex() {
+   Index* maxIndex() {
    	int i,j;
-   	Index index;
+   	Index* index = new Index;
    	unsigned int max = 0;
    	for (i = 0; i < ax0; i++) {
    		for(j = 0; j < ax1; j++) {
-   			if (data[i][j] > max) {
-   				max = data[i][j];
-   				index.x = i;
-   				index.y = j;
-   			}
+            if (mask[i][j]) {
+               if (data[i][j] > max) {
+      				max = data[i][j];
+      				index->x = i;
+      				index->y = j;
+      			}
+            }
    		}
    	}
    	return index;
    }
+   Rect* findSourceRect() {
+      Index* centre = maxIndex();
+      int cx = centre->x;
+      int cy = centre->y;
+      int l = cx;
+      int r = cx;
+      int t = cy;
+      int b = cy;
+      while (mask[r][cy] && data[r][cy] > cutoff) {
+         r++;
+      }
+      while (mask[l][cy] && data[l][cy] > cutoff) {
+         l--;
+      }
+      while (mask[cx][b] && data[cx][b] > cutoff) {
+         b++;
+      }
+      while (mask[cx][t] && data[cx][t] > cutoff) {
+         t--;
+      }
+      Rect* rect = new Rect(l,r,t,b);
+      return rect;
+   }
 };
 
-
 int main() {
-   ::Image img;
+   ::Image img = ::Image(3435);
    img.readImage();
    img.generateMask(3200);
-   Index index = img.maxIndex();
-   std::cout << index.x << std::endl;
-   std::cout << index.y << std::endl;
+   Index* index = img.maxIndex();
+   std::cout << index->x << std::endl;
+   std::cout << index->y << std::endl;
    //img.printData();
 }

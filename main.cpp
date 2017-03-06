@@ -4,13 +4,10 @@
 
 #include <CCfits/CCfits>
 #include <cmath>
+#include <stdio.h>
+#include "structs.h"
 
 using namespace CCfits;
-
-struct Index {
-   int x;
-   int y;
-};
 
 class Rect {
 private:
@@ -26,11 +23,14 @@ public:
       return (index.x < bottom && index.x > top) && (index.y < right && index.y > left);
    }
    void maskRect(bool** mask) {
-      for (int i = left; i < right; i++) {
-         for (int j = top; j < bottom; j++) {
+      for (int i = top; i < bottom; i++) {
+         for (int j = left; j < right; j++) {
             mask[i][j] = false;
          }
       }
+   }
+   printRect() {
+      
    }
 };
 
@@ -41,6 +41,7 @@ private:
    bool** mask;
    long ax0,ax1;
    unsigned int cutoff;
+   std::vector<Rect*> sources;
 public:
    Image(int co) {
       cutoff = co;
@@ -103,30 +104,44 @@ public:
             }
    		}
    	}
+      std::cout << index->x << " " << index->y << " " << max << std::endl;
    	return index;
    }
-   Rect* findSourceRect() {
-      Index* centre = maxIndex();
+   Rect* findSourceRect(Index* centre) {
       int cx = centre->x;
       int cy = centre->y;
-      int l = cx;
-      int r = cx;
-      int t = cy;
-      int b = cy;
-      while (mask[r][cy] && data[r][cy] > cutoff) {
+      int l = cy;
+      int r = cy;
+      int t = cx;
+      int b = cx;
+      while (mask[cx][l] && data[cx][l] > cutoff && r < ax0) {
          r++;
       }
-      while (mask[l][cy] && data[l][cy] > cutoff) {
+      while (mask[cx][r] && data[cx][r] > cutoff && l > 0) {
          l--;
       }
-      while (mask[cx][b] && data[cx][b] > cutoff) {
+      while (mask[b][cy] && data[b][cy] > cutoff && b < ax1) {
          b++;
       }
-      while (mask[cx][t] && data[cx][t] > cutoff) {
+      while (mask[t][cy] && data[t][cy] > cutoff && t > 0) {
          t--;
       }
       Rect* rect = new Rect(l,r,t,b);
       return rect;
+   }
+   void findSources() {
+      int n = 0;
+      while(true) {
+         Index* centre = maxIndex();
+         if (!centre->x && !centre->y) {
+            break;
+         }
+         n++;
+         Rect* rect = findSourceRect(centre);
+         sources.push_back(rect);
+         rect->maskRect(mask);
+      }
+      std::cout << n << std::endl;
    }
 };
 
@@ -134,8 +149,5 @@ int main() {
    ::Image img = ::Image(3435);
    img.readImage();
    img.generateMask(3200);
-   Index* index = img.maxIndex();
-   std::cout << index->x << std::endl;
-   std::cout << index->y << std::endl;
-   //img.printData();
+   img.findSources();
 }

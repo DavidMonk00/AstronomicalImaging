@@ -29,9 +29,6 @@ public:
          }
       }
    }
-   printRect() {
-      
-   }
 };
 
 class Image {
@@ -41,13 +38,13 @@ private:
    bool** mask;
    long ax0,ax1;
    unsigned int cutoff;
-   std::vector<Rect*> sources;
+   std::vector<Index*> sources;
 public:
    Image(int co) {
       cutoff = co;
    }
    void readImage() {
-      std::auto_ptr<FITS> pInfile(new FITS("./A1_mosaic.fits",Read,true));
+      std::auto_ptr<FITS> pInfile(new FITS("./A1_mosaic_mask.fits",Read,true));
       PHDU& image = pInfile->pHDU();
       image.readAllKeys();
       image.read(contents);
@@ -63,23 +60,16 @@ public:
          }
       }
    }
-   void generateMask(unsigned int min_cutoff) {
-      int t = 0;
+   void generateMask() {
       mask = new bool*[ax0];
       for (int i = 0; i < ax0; i++) {
          mask[i] = new bool[ax1];
          for (int j = 0; j < ax1; j++) {
-            if (data[i][j] < min_cutoff) {
-               mask[i][j] = false;
-            } else if (data[i][j] == 3421) {
-               mask[i][j] = false;
-            } else {
-               t++;
+            if (data[i][j]) {
                mask[i][j] = true;
             }
          }
       }
-      std::cout << t << std::endl;
    }
    void printData() {
       for (long j = 0; j < ax1; j++) {
@@ -100,6 +90,7 @@ public:
       				max = data[i][j];
       				index->x = i;
       				index->y = j;
+                  index->max = max;
       			}
             }
    		}
@@ -107,47 +98,36 @@ public:
       std::cout << index->x << " " << index->y << " " << max << std::endl;
    	return index;
    }
-   Rect* findSourceRect(Index* centre) {
-      int cx = centre->x;
-      int cy = centre->y;
-      int l = cy;
-      int r = cy;
-      int t = cx;
-      int b = cx;
-      while (mask[cx][l] && data[cx][l] > cutoff && r < ax0) {
-         r++;
-      }
-      while (mask[cx][r] && data[cx][r] > cutoff && l > 0) {
-         l--;
-      }
-      while (mask[b][cy] && data[b][cy] > cutoff && b < ax1) {
-         b++;
-      }
-      while (mask[t][cy] && data[t][cy] > cutoff && t > 0) {
-         t--;
-      }
-      Rect* rect = new Rect(l,r,t,b);
-      return rect;
-   }
-   void findSources() {
+   void findSources(int aperture) {
+      int a = aperture/2;
       int n = 0;
       while(true) {
          Index* centre = maxIndex();
-         if (!centre->x && !centre->y) {
+         int x = centre->x;
+         int y = centre->y;
+         if (centre->max < cutoff) {
             break;
          }
          n++;
-         Rect* rect = findSourceRect(centre);
-         sources.push_back(rect);
-         rect->maskRect(mask);
+         sources.push_back(centre);
+         int i,j;
+         int bottom = (x-a)>0 ? x-a : 0;
+         int top = (x+a)<ax0 ? x+a : ax0;
+         int left = (y-a)>0 ? y-a : 0;
+         int right = (y+a)<ax1 ? y+a : ax1;
+         for (i = bottom; i < top; i++){
+            for (j = left; j < right; j++) {
+               mask[i][j] = false;
+            }
+         }
       }
       std::cout << n << std::endl;
    }
 };
 
 int main() {
-   ::Image img = ::Image(3435);
+   ::Image img = ::Image(3700);
    img.readImage();
-   img.generateMask(3200);
-   img.findSources();
+   img.generateMask();
+   img.findSources(12);
 }

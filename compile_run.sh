@@ -6,6 +6,6 @@ echo "Compilation complete, running file..."
 echo "Generating masked image..."
 python mask.py
 echo "Finding sources..."
-time ./main.o
+time ./main.o $1 $2
 echo "Plotting..."
-python plotsources.py
+python plotsources.py $2

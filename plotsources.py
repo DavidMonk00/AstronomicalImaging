@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
 def hist(data):
     #bins = np.arange(3300,3700+1,1)
@@ -9,12 +10,12 @@ def hist(data):
     #print len(bins)
     #print len(dat)
     plt.scatter(bins[1:],dat)
-    plt.ylim(0)
-    #plt.yscale('log')
-    #plt.show()
+    plt.ylim(1e-4,1e-1)
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.show()
 
-def plotSources(data):
-    a = 24
+def plotSources(data, a):
     grid = np.zeros((4411, 2370))
     for i in range(data.shape[0]):
         x = data[i,1]
@@ -25,9 +26,10 @@ def plotSources(data):
 
 
 def main():
+    a = int(sys.argv[1])
     sources = np.genfromtxt('./sources.csv', delimiter=',',dtype=int)
-    #plotSources(sources)
-    hist(sources[:,2])
+    plotSources(sources, a)
+    hist(sources[:,2]-min(sources[:,2]))
 
 if (__name__=="__main__"):
     main()

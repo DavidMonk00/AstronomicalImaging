@@ -1,7 +1,7 @@
 
 rm ./main.o
 echo "Compiling code..."
-time g++ -W main.cpp -o main.o -lCCfits -lcfitsio -lm
+time g++ -W main.cpp -o main.o -lCCfits -lcfitsio -lm -lpthread
 echo "Compilation complete, running file..."
 echo "Generating masked image..."
 python mask.py

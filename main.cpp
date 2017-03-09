@@ -4,6 +4,7 @@
 
 #include <CCfits/CCfits>
 #include <cmath>
+#include <fstream>
 #include <stdio.h>
 #include <pthread.h>
 #include "structs.h"
@@ -12,8 +13,7 @@
 
 using namespace std;
 
-struct Helper;
-vector<Index*> sources;
+vector<Index> sources;
 
 class Rect {
 private:
@@ -114,7 +114,7 @@ Index* maxIndex(ThreadArgs* args) {
          }
       }
    }
-   cout << index->x << " " << index->y << " " << max << endl;
+   //cout << index->x << " " << index->y << " " << max << endl;
    return index;
 }
 
@@ -132,7 +132,7 @@ void* thrd_findSources(void* threadargs) {
          break;
       }
       n++;
-      sources.push_back(centre);
+      sources.push_back(*centre);
       int i,j;
       int bottom = (x-a)>0 ? x-a : 0;
       int top = (x+a)<ax0 ? x+a : ax0;
@@ -176,5 +176,11 @@ int main() {
    img.init(3700);
    img.readImage();
    img.generateMask();
-   findSources(12, &img);
+   findSources(24, &img);
+   ofstream f;
+   f.open("sources.csv");
+   for (vector<Index>::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+      Index index = *i;
+      f << index.x << "," << index.y << "," << index.max << '\n';
+   }
 }

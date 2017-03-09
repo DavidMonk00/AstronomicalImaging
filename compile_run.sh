@@ -7,3 +7,5 @@ echo "Generating masked image..."
 python mask.py
 echo "Finding sources..."
 time ./main.o
+echo "Plotting..."
+python plotsources.py

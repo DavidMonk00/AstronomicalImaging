@@ -36,7 +36,7 @@ class Image:
         self.maskStars()
         self.data = self.data[100:-100,100:-100]
         self.f[0].data = self.data
-        print self.data.shape
+        #print self.data.shape
         self.f.writeto("./A1_mosaic_mask.fits", overwrite=True)
     def plotMask(self):
         plt.imshow(self.mask, origin='lower', interpolation='nearest',cmap='hot')

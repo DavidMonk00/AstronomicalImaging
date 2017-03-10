@@ -4,13 +4,13 @@ import sys
 
 def hist(data):
     #bins = np.arange(3300,3700+1,1)
-    bins = np.arange(min(data),max(data)+1,10)
+    bins = np.arange(min(data),max(data)+1,100)
     dat = np.histogram(data,bins)
     dat = dat[0]/float(len(data))
     #print len(bins)
     #print len(dat)
     plt.scatter(bins[1:],dat)
-    plt.ylim(1e-4,1e-1)
+    plt.ylim(1e-4,1e-0)
     plt.yscale('log')
     plt.xscale('log')
     plt.show()
@@ -28,7 +28,8 @@ def plotSources(data, a):
 def main():
     a = int(sys.argv[1])
     sources = np.genfromtxt('./sources.csv', delimiter=',',dtype=int)
-    plotSources(sources, a)
+    print len(sources)
+    #plotSources(sources, a)
     hist(sources[:,2]-min(sources[:,2]))
 
 if (__name__=="__main__"):

@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include "structs.h"
 
-#define NUM_THREADS 4
+#define NUM_THREADS 8
 
 using namespace std;
 
@@ -96,20 +96,24 @@ public:
 };
 
 Index* maxIndex(ThreadArgs* args) {
+   bool** mask = args->mask;
+   int a = args->aperture/2;
    int i,j;
    Index* index = new Index;
    int rows = args->ax0/NUM_THREADS;
-   int start = args->thread_id*rows;
-   int end = (args->thread_id+1)*rows;
+   int start = args->thread_id*rows + a;
+   int end = (args->thread_id+1)*rows - a;
    unsigned int max = 0;
    for (i = start; i < end; i++) {
-      for(j = 0; j < args->ax1; j++) {
-         if (args->mask[i][j]) {
-            if (args->data[i][j] > max) {
-               max = args->data[i][j];
-               index->x = i;
-               index->y = j;
-               index->max = max;
+      for(j = a; j < args->ax1 - a; j++) {
+         if (mask[i][j]) {
+            if (mask[i-a][j-a] && mask[i+a][j-a] && mask[i-a][j+a] && mask[i+a][j+a]) {
+               if (args->data[i][j] > max) {
+                  max = args->data[i][j];
+                  index->x = i;
+                  index->y = j;
+                  index->max = max;
+               }
             }
          }
       }

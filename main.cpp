@@ -176,13 +176,18 @@ void findSources(int aperture, ::Image* img) {
 }
 
 int main(int argc, char* argv[]) {
-   ::Image img;
-   img.init(atoi(argv[1]));
-   img.readImage();
-   img.generateMask();
-   findSources(atoi(argv[2]), &img);
+   ::Image* img = new ::Image;
+   int aperture = atoi(argv[2]);
+   int cutoff = atoi(argv[1]);
+   img->init(cutoff);
+   img->readImage();
+   img->generateMask();
+   findSources(aperture, img);
+   delete img;
    ofstream f;
-   f.open("sources.csv");
+   char str[64];
+   sprintf(str, "./data/sources_%d_%d.csv", aperture, cutoff);
+   f.open(str);
    for (vector<Index>::const_iterator i = sources.begin(); i != sources.end(); ++i) {
       Index index = *i;
       f << index.x << "," << index.y << "," << index.max << '\n';

@@ -2,6 +2,7 @@ import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import sys
+from log_bin_CN_2016 import log_bin
 
 class Source:
     def __init__(x,y,flux):
@@ -65,9 +66,15 @@ def hist(data):
     plt.xscale('log')
     plt.show()
 
+def logHist(data):
+    bins,dat = log_bin(data,a=2)
+    plt.scatter(bins,dat)
+    plt.xscale('log')
+    plt.show()
+
 def main():
     p = Photometry(int(sys.argv[1]))
-    p.getFlux()
+    hist(p.getFlux())
 
 if (__name__ == '__main__'):
     main()

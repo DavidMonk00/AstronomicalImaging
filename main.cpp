@@ -53,28 +53,36 @@ public:
       CCfits::PHDU& image = pInfile->pHDU();
       image.readAllKeys();
       image.read(contents);
-      ax0 = image.axis(0);
-      ax1 = image.axis(1);
+      ax1 = image.axis(0);
+      ax0 = image.axis(1);
+      cout << ax0 << " - " << ax1 << endl;
       data = new unsigned long*[ax0];
       for (int i = 0; i < ax0; i++) {
          data[i] = new unsigned long[ax1];
       }
+      int sum = 0;
       for (int i = 0; i < ax0; i++) {
          for (int j = 0; j < ax1; j++) {
-            data[i][j] = contents[ax0*i + j];
+            data[i][j] = contents[ax1*i + j];
          }
+         sum++;
+         //cout << sum << endl;
       }
+      //cout << sum << endl;
    }
    void generateMask() {
       mask = new bool*[ax0];
+      int sum = 0;
       for (int i = 0; i < ax0; i++) {
          mask[i] = new bool[ax1];
          for (int j = 0; j < ax1; j++) {
             if (data[i][j]) {
+               sum++;
                mask[i][j] = true;
             }
          }
       }
+      //cout << sum << endl;
    }
    void printData() {
       for (long j = 0; j < ax1; j++) {
@@ -118,7 +126,7 @@ Index* maxIndex(ThreadArgs* args) {
          }
       }
    }
-   //cout << index->x << " " << index->y << " " << max << endl;
+   //cout << index->x + 100 << " " << index->y + 100 << " " << max << endl;
    return index;
 }
 
@@ -190,6 +198,6 @@ int main(int argc, char* argv[]) {
    f.open(str);
    for (vector<Index>::const_iterator i = sources.begin(); i != sources.end(); ++i) {
       Index index = *i;
-      f << index.x << "," << index.y << "," << index.max << '\n';
+      f << index.x << "," << index.y  << "," << index.max << '\n';
    }
 }

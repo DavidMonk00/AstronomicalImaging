@@ -77,11 +77,14 @@ def hist(data):
     bins = np.arange(int(min(data)),max(data)+1,0.5)
     dat = np.histogram(data,bins)
     dat = dat[0]
+    d = []
+    for i in range(len(dat)):
+        d.append(sum(dat[:i]))
     #print len(bins)
     #print len(dat)
-    plt.scatter(bins[1:],dat)
-    plt.ylim(1e-1,1e3)
-    plt.xlim(9,16.5)
+    plt.errorbar(bins[1:],d,yerr=1/np.sqrt(d),fmt='o')
+    plt.ylim(1e-1,1e4)
+    plt.xlim(9,25.5)
     plt.yscale('log')
     print bins
     print dat

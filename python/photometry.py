@@ -11,6 +11,7 @@ class Source:
 
 class Photometry:
     def __init__(self,d,f):
+        print "Loading data..."
         self.radius = d/2
         self.f = fits.open("./img/A1_mosaic.fits")
         self.raw_data = self.f[0].data
@@ -48,22 +49,23 @@ class Photometry:
         grid_r = self.getCircleMask(grid_r, radius)
         grid = np.logical_xor(grid_t,grid_r)
         #print np.sum(grid*data_t)/np.sum(grid)
-        return np.median(grid*data_t)
+        d = grid*data_t
+        minimum =  np.min(d[np.nonzero(d)])
+        median = np.median(d[np.nonzero(d)])
+        mean = np.sum(grid*data_t)/np.sum(grid)
+        #print minimum, median, mean
+        return minimum
     def getFlux(self):
-        s = 0
         for i in self.sources:
             i[0] += 100
             i[1] += 100
             background = self.getMeanCircle(i,np.array((i[2],i[3])), 5)
             flux = self.getFluxSource(i,np.array((i[2],i[3])), background)
             if (flux < 0):
-                s += 1
                 i[4] = 0
             else:
                 i[4] = flux
             #print background, flux
-        print s
-
     def checkEdges(self,x,y):
         border = 2*self.radius + 1
         h = []
@@ -76,11 +78,10 @@ class Photometry:
                     self.sources = np.delete(self.sources,np.where(self.sources[:,:2]==[i,j])[0],0)
         #print h,v
         return (np.mean(v),np.mean(h),(float(np.ptp(v))+2*self.radius)/2,(float(np.ptp(h))+2*self.radius)/2)
-
-
     def findExtendedSources(self):
+        N = len(self.sources)
         i = 0
-        print len(self.sources)
+        print "Total initial sources: %d"%(len(self.sources))
         sources = [] #[x,y,a,b]
         while (len(self.sources) > 0):
             g = self.checkEdges(self.sources[i,0],self.sources[i,1])
@@ -89,8 +90,7 @@ class Photometry:
         temp = np.array(sources)
         self.sources = np.zeros((temp.shape[0],temp.shape[1]+1))
         self.sources[:,:temp.shape[1]] = temp
-        #print self.sources
-
+        print "Total sources: %d"%(len(self.sources))
     def getMagnitudes(self):
         self.magnitudes = []
         ZP = self.f[0].header['MAGZPT']
@@ -113,11 +113,10 @@ def hist(data):
     #print len(dat)
     plt.errorbar(bins[1:],d,yerr=1/np.sqrt(d),fmt='o')
     plt.ylim(1e0,1e4)
-    plt.xlim(9,25.5)
+    plt.xlim(9,20)
     plt.yscale('log')
-    print bins
-    print dat
-    print sum(dat)
+    #print bins
+    #print dat
     #plt.xscale('log')
 
 def logHist(data, i):
@@ -130,16 +129,21 @@ def logHist(data, i):
 
 def main():
     a = int(sys.argv[1])
-    f = [file for file in os.listdir("./data/") if (file.find('_'+str(a)+'_') != -1)]
+    c = int(sys.argv[2])
+    f = [file for file in os.listdir("./data/") if (file.find('_'+str(a)+'_'+str(c)) != -1)]
     f.sort()
     #for i in range(len(f)):
     p = Photometry(a,f[0])
+    print "Checking for extended sources..."
     p.findExtendedSources()
+    print "Calculating flux..."
     p.getFlux()
+    print "Converting to magnitudes..."
     #print p.sources
     p.getMagnitudes()
+    print "Plotting..."
     hist(p.magnitudes)
-    plt.show()
+    #plt.show()
 
 if (__name__ == '__main__'):
     main()

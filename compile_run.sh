@@ -1,6 +1,6 @@
 rm ./C++/main.o
 echo "Compiling code..."
-g++ -W ./C++/main.cpp -o ./C++/main.o -lCCfits -lcfitsio -lm -lpthread
+g++ ./C++/main.cpp -o ./C++/main.o -lCCfits -lcfitsio -lm -lpthread
 echo "Compilation complete, running file..."
 echo "Generating masked image..."
 python ./python/mask.py
@@ -10,6 +10,7 @@ echo "Finding sources..."
 #   echo $i
 #   ./main.o $i $1
 #done
-./C++/main.o 3500 $1
-echo "Plotting..."
-python ./python/photometry.py $1
+./C++/main.o $2 $1
+echo "Source detection complete. Starting photometry..."
+python -W ignore ./python/photometry.py $1 $2
+

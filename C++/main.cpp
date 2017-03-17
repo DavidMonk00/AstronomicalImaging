@@ -55,7 +55,7 @@ public:
       image.read(contents);
       ax1 = image.axis(0);
       ax0 = image.axis(1);
-      cout << ax0 << " - " << ax1 << endl;
+      //cout << ax0 << " - " << ax1 << endl;
       data = new unsigned long*[ax0];
       for (int i = 0; i < ax0; i++) {
          data[i] = new unsigned long[ax1];

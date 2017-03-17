@@ -10,6 +10,6 @@ echo "Finding sources..."
 #   echo $i
 #   ./main.o $i $1
 #done
-./C++/main.o 3600 $1
+./C++/main.o 3500 $1
 echo "Plotting..."
 python ./python/photometry.py $1

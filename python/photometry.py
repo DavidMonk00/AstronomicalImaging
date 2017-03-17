@@ -30,7 +30,7 @@ class Photometry:
     def getFluxSource(self, source, radius, background):
         x = source[0]
         y = source[1]
-        grid = np.zeros((2*radius[0]+1,2*radius[1]+1),dtype=bool)
+        grid = np.zeros((int(2*radius[0])+1,int(2*radius[1])+1),dtype=bool)
         grid = self.getCircleMask(grid, radius)
         data = self.data[x-radius[0]:x+radius[0]+1,y-radius[1]:y+radius[1]+1]
         flux = np.sum(np.logical_and(data,grid)*(data-background))
@@ -41,14 +41,14 @@ class Photometry:
         R = radius + border
         x = source[0]
         y = source[1]
-        grid_t = np.zeros((2*R[0]+1,2*R[1]+1),dtype=bool)
+        grid_t = np.zeros((int(2*R[0])+1,int(2*R[1])+1),dtype=bool)
         grid_t = self.getCircleMask(grid_t,R)
         data_t = self.data[x-R[0]:x+R[0]+1,y-R[1]:y+R[1]+1]
-        grid_r = np.zeros((2*R[0]+1,2*R[1]+1),dtype=bool)
+        grid_r = np.zeros((int(2*R[0])+1,int(2*R[1])+1),dtype=bool)
         grid_r = self.getCircleMask(grid_r, radius)
         grid = np.logical_xor(grid_t,grid_r)
         #print np.sum(grid*data_t)/np.sum(grid)
-        return np.sum(grid*data_t)/np.sum(grid)
+        return np.median(grid*data_t)
     def getFlux(self):
         s = 0
         for i in self.sources:
@@ -113,10 +113,11 @@ def hist(data):
     #print len(dat)
     plt.errorbar(bins[1:],d,yerr=1/np.sqrt(d),fmt='o')
     plt.ylim(1e0,1e4)
-    plt.xlim(5,25.5)
+    plt.xlim(9,25.5)
     plt.yscale('log')
     print bins
-    print d
+    print dat
+    print sum(dat)
     #plt.xscale('log')
 
 def logHist(data, i):
@@ -135,7 +136,7 @@ def main():
     p = Photometry(a,f[0])
     p.findExtendedSources()
     p.getFlux()
-    print p.sources
+    #print p.sources
     p.getMagnitudes()
     hist(p.magnitudes)
     plt.show()

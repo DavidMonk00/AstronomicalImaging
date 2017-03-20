@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
    delete img;
    ofstream f;
    char str[64];
-   sprintf(str, "./data/sources_%d_%d.csv", aperture, cutoff);
+   sprintf(str, "./data/raw_sources_%d_%d.csv", aperture, cutoff);
    f.open(str);
    for (vector<Index>::const_iterator i = sources.begin(); i != sources.end(); ++i) {
       Index index = *i;

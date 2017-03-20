@@ -10,7 +10,8 @@ class Source:
         self.flux = flux
 
 class Photometry:
-    def __init__(self,d,f):
+    def __init__(self,d,f,c):
+        self.cutoff = c
         print "Loading data..."
         self.radius = d/2
         self.f = fits.open("./img/A1_mosaic.fits")
@@ -90,6 +91,7 @@ class Photometry:
         temp = np.array(sources)
         self.sources = np.zeros((temp.shape[0],temp.shape[1]+1))
         self.sources[:,:temp.shape[1]] = temp
+        np.savetxt("./data/sources_%d_%d.csv"%(2*self.radius,self.cutoff), self.sources)
         print "Total sources: %d"%(len(self.sources))
     def getMagnitudes(self):
         self.magnitudes = []
@@ -115,12 +117,13 @@ def hist(data):
     plt.ylim(1e0,1e4)
     plt.xlim(9,20)
     plt.yscale('log')
-    #print bins
-    #print dat
+    print bins
+    print dat
+    print d
     #plt.xscale('log')
 
 def logHist(data, i):
-    bins,dat = log_bin(data,a=2)
+    bins,dat = log_bin(data,a=1.5)
     plt.plot(bins,dat, label = 'Cutoff = %d'%(3500+i*100))
     plt.xscale('log')
     plt.yscale('log')
@@ -133,7 +136,7 @@ def main():
     f = [file for file in os.listdir("./data/") if (file.find('_'+str(a)+'_'+str(c)) != -1)]
     f.sort()
     #for i in range(len(f)):
-    p = Photometry(a,f[0])
+    p = Photometry(a,f[0],c)
     print "Checking for extended sources..."
     p.findExtendedSources()
     print "Calculating flux..."
@@ -143,7 +146,7 @@ def main():
     p.getMagnitudes()
     print "Plotting..."
     hist(p.magnitudes)
-    #plt.show()
+    plt.show()
 
 if (__name__ == '__main__'):
     main()

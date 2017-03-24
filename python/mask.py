@@ -61,10 +61,39 @@ stars = [Rect((1250,3360),(1680,3000)),
          Rect((545,4120),(563,4080)),
          Rect((2070,1460),(2105,1400))]
 
+def hist(data):
+    #bins = np.arange(3300,3700+1,1)
+    #print max(data), min(data)
+    #print data
+    data = data.flatten()
+    bins = np.arange(3300,3550+1,1)
+    #bins = np.arange(int(min(data)),max(data)+1,100)
+    dat = np.histogram(data,bins)
+    dat = dat[0]
+    d = []
+    for i in range(len(dat)):
+        d.append(sum(dat[:i]))
+    #print len(bins)
+    #print len(dat)
+    plt.errorbar(bins[1:],dat,yerr=1/np.sqrt(d),fmt='o')
+    plt.ylim(0,4e5)
+    d = np.zeros((len(dat),2))
+    d[:,0] = bins[1:]
+    d[:,1] = dat
+    np.savetxt("background",d)
+    #plt.xlim(9,20)
+    #plt.yscale('log')
+    #print bins
+    #print dat
+    #print d
+    #plt.xscale('log')
+
 def main():
     image = Image(3425)
     image.readImage()
     image.maskAndSave()
+    hist(image.raw_data)
+    #plt.show()
     #image.plotImage()
 
 if (__name__ == '__main__'):

@@ -54,7 +54,7 @@ class Photometry:
         minimum =  np.min(d[np.nonzero(d)])
         median = np.median(d[np.nonzero(d)])
         mean = np.sum(grid*data_t)/np.sum(grid)
-        #print minimum, median, mean
+        print "cutoff:", minimum, median, mean
         return minimum
     def getFlux(self):
         for i in self.sources:
@@ -145,8 +145,8 @@ def main():
     #print p.sources
     p.getMagnitudes()
     print "Plotting..."
-    hist(p.magnitudes)
-    plt.show()
+    #hist(p.magnitudes)
+    #plt.show()
 
 if (__name__ == '__main__'):
     main()
